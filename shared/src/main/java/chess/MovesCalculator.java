@@ -121,6 +121,7 @@ public class MovesCalculator {    //list possible moves here
             }
         }
 
+
         // Bottom
         if (row-1 > 0){
             if (board.getPiece(new ChessPosition(row - 1, col)) != null){
