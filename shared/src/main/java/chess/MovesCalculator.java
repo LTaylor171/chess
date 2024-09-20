@@ -33,31 +33,74 @@ public class MovesCalculator {    //list possible moves here
         int col = myPosition.getColumn();
         ChessPiece.PieceType promotionPiece = null;
 
+        int newRow = row;
+        int newCol = col;
+
         // Top-right diagonal
         for (int i = 1; i < 9; i++) {
-            if (row+i < 9 && col+i < 9) {
-                moves.add(new ChessMove(myPosition, new ChessPosition(row + i, col + i), promotionPiece));
+            newRow = row + i;
+            newCol = col + i;
+            if (newRow < 9 && newCol < 9) {
+                if (board.getPiece(new ChessPosition(newRow, newCol)) != null){
+                    if (board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                    }
+                    break;
+                }
+                else {
+                    moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                }
             }
         }
 
         // Top-left diagonal
         for (int i = 1; i < 9; i++) {
-            if (row+i < 9 && col-i > 0) {
-                moves.add(new ChessMove(myPosition, new ChessPosition(row + i, col - i), promotionPiece));
+            newRow = row + i;
+            newCol = col - i;
+            if (newRow < 9 && newCol > 0) {
+                if (board.getPiece(new ChessPosition(newRow, newCol)) != null){
+                    if (board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                    }
+                    break;
+                }
+                else {
+                    moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                }
             }
         }
 
         // Bottom-right diagonal
-        for (int i = 8; i > 0; i--) {
-            if (row-i > 0 && col+i < 9) {
-                moves.add(new ChessMove(myPosition, new ChessPosition(row - i, col + i), promotionPiece));
+        for (int i = 1; i < 9; i++) {
+            newRow = row - i;
+            newCol = col + i;
+            if (newRow > 0 && newCol < 9) {
+                if (board.getPiece(new ChessPosition(newRow, newCol)) != null){
+                    if (board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                    }
+                    break;
+                }
+                else {
+                    moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                }
             }
         }
 
         // Bottom-left diagonal
-        for (int i = 8; i > 0; i--) {
-            if (row-i > 0 && col-i > 0) {
-                moves.add(new ChessMove(myPosition, new ChessPosition(row + i, col + i), promotionPiece));
+        for (int i = 1; i < 9; i++) {
+            newRow = row - i;
+            newCol = col - i;
+            if (newRow > 0 && newCol > 0) {
+                if (board.getPiece(new ChessPosition(newRow, newCol)) != null){
+                    if (board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                    }
+                    break;
+                }
+                else {
+                    moves.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), promotionPiece));
+                }
             }
         }
 
