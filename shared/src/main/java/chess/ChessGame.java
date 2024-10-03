@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -50,7 +51,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        turn = team;
     }
 
     /**
@@ -69,7 +70,21 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> allMoves = new ArrayList<>();
+        ChessPiece piece = board.getPiece(startPosition);
+        Collection<ChessMove> pieceMoves = (Collection<ChessMove>) piece.pieceMoves(board, startPosition);
+        
+        for (ChessMove move : pieceMoves) {
+            ChessGame newBoard = new ChessGame();
+            newBoard.board = board;
+            newBoard.board.addPiece(move.getEndPosition(), piece);
+            newBoard.board.addPiece(move.getStartPosition(), null);
+            if (!newBoard.isInCheck(piece.getTeamColor())) {
+                allMoves.add(move);
+            }
+        }
+
+        return allMoves;
     }
 
     /**
