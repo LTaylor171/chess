@@ -3,6 +3,7 @@ package chess;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -24,7 +25,7 @@ public class ChessGame {
 
     @Override
     public int hashCode() {
-        return Objects.hash(turn, Objects.hash(board));
+        return Objects.hash(turn, board);
     }
 
     @Override
@@ -74,10 +75,10 @@ public class ChessGame {
         Collection<ChessMove> allMoves = new ArrayList<>();
         ChessPiece piece = board.getPiece(startPosition);
         Collection<ChessMove> pieceMoves = (Collection<ChessMove>) piece.pieceMoves(board, startPosition);
-        
+
         for (ChessMove move : pieceMoves) {
             ChessGame newBoard = new ChessGame();
-            newBoard.board = board;
+            newBoard.copyBoard(board);
             newBoard.board.addPiece(move.getEndPosition(), piece);
             newBoard.board.addPiece(move.getStartPosition(), null);
             if (!newBoard.isInCheck(piece.getTeamColor())) {
@@ -102,7 +103,7 @@ public class ChessGame {
         boolean isValid = false;
         Collection<ChessMove> validMoves = (Collection<ChessMove>) validMoves(move.getStartPosition());
         for (ChessMove validMove : validMoves) {
-            if (validMove.equals(move)) {
+            if (move.equals(validMove)) {
                 isValid = true;
                 // if it is a pawn and moved to the end, promote
                 if (move.getPromotionPiece() != null){
@@ -113,12 +114,13 @@ public class ChessGame {
                     board.addPiece(move.getEndPosition(), movingPiece);
                 }
                 // delete the piece from the old position
+
                 board.addPiece(move.getStartPosition(), null);
 
                 // change the turn
                 if (turn == TeamColor.WHITE) {
                     turn = TeamColor.BLACK;
-                } 
+                }
                 else {
                     turn = TeamColor.WHITE;
                 }
@@ -206,5 +208,20 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public void copyBoard(ChessBoard currentBoard) {
+        // completely copy the board. This is to check moves without placing them on the real board
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition currentPosition = new ChessPosition(row, col);
+                if (currentBoard.getPiece(currentPosition) != null) {
+                    this.board.addPiece(currentPosition, currentBoard.getPiece(currentPosition));
+                }
+                else {
+                    this.board.addPiece(currentPosition, null);
+                }
+            }
+        }
     }
 }

@@ -18,9 +18,14 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        return "ChessBoard{" +
-                "board=" + Arrays.toString(board) +
-                '}';
+        StringBuilder printString = new StringBuilder("Board=\n");
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++) {
+                printString.append((board[i][j]));
+            }
+            printString.append("\n");
+        }
+        return printString.toString();
     }
 
     @Override
