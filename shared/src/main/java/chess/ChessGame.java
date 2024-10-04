@@ -3,7 +3,6 @@ package chess;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -13,7 +12,9 @@ import java.util.Arrays;
  */
 public class ChessGame {
     private ChessGame.TeamColor turn;
+    // create a new reset chess board
     private ChessBoard board = new ChessBoard();
+
 
     @Override
     public boolean equals(Object o) {
@@ -38,6 +39,7 @@ public class ChessGame {
 
     public ChessGame() {
         turn = ChessGame.TeamColor.WHITE;
+        board.resetBoard();
     }
 
     /**
@@ -85,6 +87,8 @@ public class ChessGame {
                 allMoves.add(move);
             }
         }
+        System.out.println("Piece: " + piece);
+        System.out.println("Valid moves: " + allMoves);
 
         return allMoves;
     }
@@ -97,35 +101,38 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece movingPiece = board.getPiece(move.getStartPosition());
-        if (movingPiece.getTeamColor() != turn) {
-            throw new InvalidMoveException();
-        }
         boolean isValid = false;
-        Collection<ChessMove> validMoves = (Collection<ChessMove>) validMoves(move.getStartPosition());
-        for (ChessMove validMove : validMoves) {
-            if (move.equals(validMove)) {
-                isValid = true;
-                // if it is a pawn and moved to the end, promote
-                if (move.getPromotionPiece() != null){
-                    ChessPiece newPiece = new ChessPiece(turn, move.getPromotionPiece());
-                    board.addPiece(move.getEndPosition(), newPiece);
-                }
-                else {
-                    board.addPiece(move.getEndPosition(), movingPiece);
-                }
-                // delete the piece from the old position
+        if (movingPiece != null){
+            if (movingPiece.getTeamColor() != turn) {
+                throw new InvalidMoveException();
+            }
 
-                board.addPiece(move.getStartPosition(), null);
+            Collection<ChessMove> validMoves = (Collection<ChessMove>) validMoves(move.getStartPosition());
+            for (ChessMove validMove : validMoves) {
+                if (move.equals(validMove)) {
+                    isValid = true;
+                    // if it is a pawn and moved to the end, promote
+                    if (move.getPromotionPiece() != null){
+                        ChessPiece newPiece = new ChessPiece(turn, move.getPromotionPiece());
+                        board.addPiece(move.getEndPosition(), newPiece);
+                    }
+                    else {
+                        board.addPiece(move.getEndPosition(), movingPiece);
+                    }
+                    // delete the piece from the old position
 
-                // change the turn
-                if (turn == TeamColor.WHITE) {
-                    turn = TeamColor.BLACK;
+                    board.addPiece(move.getStartPosition(), null);
+
+                    // change the turn
+                    if (turn == TeamColor.WHITE) {
+                        turn = TeamColor.BLACK;
+                    }
+                    else {
+                        turn = TeamColor.WHITE;
+                    }
+                    // exit for loop
+                    break;
                 }
-                else {
-                    turn = TeamColor.WHITE;
-                }
-                // exit for loop
-                break;
             }
         }
         if (!isValid) {
@@ -166,7 +173,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && isInStalemate(teamColor);
+        return isInCheck(teamColor) && noMoves(teamColor);
     }
 
     /**
@@ -177,19 +184,8 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        for (int i = 1; i < 9; i++){
-            for (int j = 1; j < 9; j++){
-                ChessPosition position = new ChessPosition(i, j);
-                ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() == teamColor){
-                    Collection<ChessMove> pieceMoves = (Collection<ChessMove>) validMoves(position);
-                    if (pieceMoves.isEmpty()){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+
+        return !isInCheck(teamColor) && noMoves(teamColor);
     }
 
     /**
@@ -209,7 +205,6 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
-
     public void copyBoard(ChessBoard currentBoard) {
         // completely copy the board. This is to check moves without placing them on the real board
         for (int row = 1; row < 9; row++) {
@@ -224,4 +219,29 @@ public class ChessGame {
             }
         }
     }
+
+    public boolean noMoves(TeamColor teamColor){
+        for (int i = 1; i < 9; i++) {
+            // Loop through each column (1 to 8)
+            for (int j = 1; j < 9; j++) {
+                // Create a ChessPosition object for the current position
+                ChessPosition position = new ChessPosition(i, j);
+                // Get the piece at the current position
+                ChessPiece piece = board.getPiece(position);
+                // Check if there is a piece and if it belongs to the specified team
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    // Get all valid moves for the piece at the current position
+                    Collection<ChessMove> pieceMoves = (Collection<ChessMove>) validMoves(position);
+                    // If the piece has no valid moves, return true indicating stalemate
+                    if (!pieceMoves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        // If no pieces of the specified team are in stalemate, return false
+        return true;
+    }
 }
+
+
