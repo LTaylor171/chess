@@ -13,17 +13,18 @@ import java.util.ArrayList;
 public class ChessGame {
     private ChessGame.TeamColor turn;
     private ChessBoard board = new ChessBoard();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessGame chessGame = (ChessGame) o;
-        return turn == chessGame.turn && Objects.equals(board, chessGame.board);
+        return turn == chessGame.turn && Objects.deepEquals(board, chessGame.board);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(turn, board);
+        return Objects.hash(turn, Objects.hash(board));
     }
 
     @Override
@@ -94,7 +95,40 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPiece movingPiece = board.getPiece(move.getStartPosition());
+        if (movingPiece.getTeamColor() != turn) {
+            throw new InvalidMoveException();
+        }
+        boolean isValid = false;
+        Collection<ChessMove> validMoves = (Collection<ChessMove>) validMoves(move.getStartPosition());
+        for (ChessMove validMove : validMoves) {
+            if (validMove.equals(move)) {
+                isValid = true;
+                // if it is a pawn and moved to the end, promote
+                if (move.getPromotionPiece() != null){
+                    ChessPiece newPiece = new ChessPiece(turn, move.getPromotionPiece());
+                    board.addPiece(move.getEndPosition(), newPiece);
+                }
+                else {
+                    board.addPiece(move.getEndPosition(), movingPiece);
+                }
+                // delete the piece from the old position
+                board.addPiece(move.getStartPosition(), null);
+
+                // change the turn
+                if (turn == TeamColor.WHITE) {
+                    turn = TeamColor.BLACK;
+                } 
+                else {
+                    turn = TeamColor.WHITE;
+                }
+                // exit for loop
+                break;
+            }
+        }
+        if (!isValid) {
+            throw new InvalidMoveException();
+        }
     }
 
     /**
@@ -105,14 +139,15 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         // for each tile on the board, if the tile has a piece of the opposite team, check if the piece can move to the king
-        for (int i = 1; i < 9; i++){
-            for (int j = 1; j < 9; j++){
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() != teamColor){
-                    Collection<ChessMove> pieceMoves = (Collection<ChessMove>) piece.pieceMoves(board, position);
-                    for (ChessMove move : pieceMoves){
-                        if (board.getPiece(move.getEndPosition()).equals(new ChessPiece(teamColor, ChessPiece.PieceType.KING))){
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> pieceMoves = piece.pieceMoves(board, position);
+                    for (ChessMove move : pieceMoves) {
+                        ChessPiece targetPiece = board.getPiece(move.getEndPosition());
+                        if (targetPiece != null && targetPiece.getTeamColor() == teamColor && targetPiece.getPieceType() == ChessPiece.PieceType.KING) {
                             return true;
                         }
                     }
